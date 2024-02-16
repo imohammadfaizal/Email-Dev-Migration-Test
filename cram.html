@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Download Image from GitHub Pages</title>
+<title>Download Image without Proxy</title>
 </head>
 <body>
 
@@ -13,34 +13,34 @@
 
 <script>
 function downloadImage() {
+    var imageUrl = 'https://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/201593_Branded_Prospect_Stream_2022_Day_8_Diet/Lifestyle/121321_Branded_Prospect_Stream_Day_18_Email_02.png';
 
-    // let imageUrls=['http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/201593_Branded_Prospect_Stream_2022_Day_8_Diet/Lifestyle/121321_Branded_Prospect_Stream_Day_18_Email_02.png','http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/201593_Branded_Prospect_Stream_2022_Day_8_Diet/Lifestyle/121321_Branded_Prospect_Stream_Day_18_Email_04.png','http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/201593_Branded_Prospect_Stream_2022_Day_18_Diet/Lifestyle/MEADOW_LEAVES_3248_n.jpg'];
-    
-    let imageUrl = 'http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/201593_Branded_Prospect_Stream_2022_Day_8_Diet/Lifestyle/121321_Branded_Prospect_Stream_Day_18_Email_02.png';
-    var httpsUrl = imageUrl.replace("http://", "https://");
-    var filename = imageUrl.substring(imageUrl.lastIndexOf('/')+1);
-    var xhr = new XMLHttpRequest();
-    xhr.open("GET", httpsUrl, true);
-    xhr.responseType = "blob";
+    var img = new Image();
+    img.crossOrigin = "Anonymous"; // Enable cross-origin resource sharing
+    img.onload = function() {
+        var canvas = document.createElement("canvas");
+        var ctx = canvas.getContext("2d");
+        canvas.width = this.width;
+        canvas.height = this.height;
+        ctx.drawImage(this, 0, 0);
+        
+        // Convert the canvas to a data URL
+        var dataUrl = canvas.toDataURL("image/png");
 
-    xhr.onload = function() {
-        if (xhr.status === 200) {
-            var url = window.URL.createObjectURL(xhr.response);
-            var a = document.createElement("a");
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-        } else {
-            alert("Failed to download image");
-        }
+        // Create a link element to trigger the download
+        var a = document.createElement("a");
+        a.href = dataUrl;
+        a.download = imageUrl.substring(imageUrl.lastIndexOf('/')+1);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
     };
-
-    xhr.send();
+    img.onerror = function() {
+        alert("Failed to load image");
+    };
+    img.src = imageUrl;
 }
 </script>
 
 </body>
 </html>
-
