@@ -4,18 +4,46 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Multiple Image Downloader</title>
+<style>
+/* CSS for the linear loader */
+.loader {
+  border: 2px solid #f3f3f3; /* Light grey */
+  border-top: 2px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+  display: none; /* Hide by default */
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
 </head>
 <body>
 
 <textarea id="imageUrls" placeholder="Enter image URLs (one per line)"></textarea>
-<button onclick="downloadImages()">Download Images</button>
+<button onclick="downloadImages()">Download Images as Zip</button>
+<div id="loader" class="loader"></div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
 <script>
 function downloadImages() {
+    // var imageUrlsTextarea = document.getElementById('imageUrls');
     let imageUrls=['http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/201593_Branded_Prospect_Stream_2022_Day_8_Diet/Lifestyle/121321_Branded_Prospect_Stream_Day_18_Email_02.png','http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/201593_Branded_Prospect_Stream_2022_Day_8_Diet/Lifestyle/121321_Branded_Prospect_Stream_Day_18_Email_04.png','http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/201593_Branded_Prospect_Stream_2022_Day_18_Diet/Lifestyle/MEADOW_LEAVES_3248_n.jpg']
+
+    // if (imageUrls.length === 0) {
+    //     alert('Please enter at least one image URL.');
+    //     return;
+    // }
 
     var zip = new JSZip();
     var count = 0;
+
+    // Show the loader
+    document.getElementById('loader').style.display = 'inline-block';
 
     imageUrls.forEach((imageUrl, index) => {
         var allOriginsUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(imageUrl);
@@ -38,6 +66,9 @@ function downloadImages() {
                     a.click();
                     document.body.removeChild(a);
                     window.URL.revokeObjectURL(url);
+
+                    // Hide the loader when download is complete
+                    document.getElementById('loader').style.display = 'none';
                 });
             }
         })
@@ -48,3 +79,4 @@ function downloadImages() {
 
 </body>
 </html>
+
