@@ -3,81 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Multiple Image Downloader</title>
-<style>
-/* CSS for the linear bar loader */
-.loader-container {
-  width: 100%;
-  height: 20px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 10px;
-}
-
-.loader-bar {
-  width: 0;
-  height: 100%;
-  background-color: #4caf50; /* Green */
-  transition: width 0.3s ease-in-out;
-}
-</style>
+<title>Download Image from GitHub Pages</title>
 </head>
 <body>
 
-<textarea id="imageUrls" placeholder="Enter image URLs (one per line)"></textarea>
-<button onclick="downloadImages()">Download Images as Zip</button>
-<div class="loader-container">
-  <div id="loaderBar" class="loader-bar"></div>
-</div>
+<h1>Download Image</h1>
+<input type="text" id="imageUrl" placeholder="Enter Image URL">
+<button onclick="downloadImage()">Download</button>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
 <script>
-function downloadImages() {
+function downloadImage() {
     let imageUrls=['http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/201593_Branded_Prospect_Stream_2022_Day_8_Diet/Lifestyle/121321_Branded_Prospect_Stream_Day_18_Email_02.png','http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/201593_Branded_Prospect_Stream_2022_Day_8_Diet/Lifestyle/121321_Branded_Prospect_Stream_Day_18_Email_04.png','http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/201593_Branded_Prospect_Stream_2022_Day_18_Diet/Lifestyle/MEADOW_LEAVES_3248_n.jpg']
-    var zip = new JSZip();
-    var count = 0;
-    var loaderBar = document.getElementById('loaderBar');
-    var increment = 100 / imageUrls.length;
 
-    // Reset loader
-    loaderBar.style.width = '0';
 
-    imageUrls.forEach((imageUrl, index) => {
-        var allOriginsUrl = imageUrl;
+    var filename = imageUrl.substring(imageUrl.lastIndexOf('/')+1);
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", imageUrl, true);
+    xhr.responseType = "blob";
 
-        fetch(allOriginsUrl)
-        .then(response => response.blob())
-        .then(blob => {
-            var filename = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
-            zip.file(filename, blob);
-            count++;
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            var url = window.URL.createObjectURL(xhr.response);
+            var a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+        } else {
+            alert("Failed to download image");
+        }
+    };
 
-            // Update loader
-            var progress = count * increment;
-            loaderBar.style.width = progress + '%';
-
-            if (count === imageUrls.length) {
-                zip.generateAsync({ type: 'blob' })
-                .then(function(content) {
-                    var url = window.URL.createObjectURL(content);
-                    var a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'images.zip';
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    window.URL.revokeObjectURL(url);
-
-                    // Reset loader
-                    loaderBar.style.width = '0';
-                });
-            }
-        })
-        .catch(error => console.error('Error downloading image:', error));
-    });
+    xhr.send();
 }
 </script>
 
 </body>
 </html>
+
