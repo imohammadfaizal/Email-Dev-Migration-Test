@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Downloader</title>
+</head>
+<body>
+
+<input type="text" id="imageUrl" placeholder="Enter image URL">
+<button onclick="downloadImage()">Download Image</button>
+
+<script>
+function downloadImage() {
+    var imageUrl = document.getElementById('imageUrl').value;
+    var allOriginsUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(imageUrl);
+
+    fetch(allOriginsUrl)
+    .then(response => response.blob())
+    .then(blob => {
+        var url = window.URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'image';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    })
+    .catch(error => console.error('Error downloading image:', error));
+}
+</script>
+
+</body>
+</html>
