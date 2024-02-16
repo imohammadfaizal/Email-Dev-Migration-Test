@@ -17,10 +17,10 @@ function downloadImage() {
     // let imageUrls=['http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/201593_Branded_Prospect_Stream_2022_Day_8_Diet/Lifestyle/121321_Branded_Prospect_Stream_Day_18_Email_02.png','http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/201593_Branded_Prospect_Stream_2022_Day_8_Diet/Lifestyle/121321_Branded_Prospect_Stream_Day_18_Email_04.png','http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/201593_Branded_Prospect_Stream_2022_Day_18_Diet/Lifestyle/MEADOW_LEAVES_3248_n.jpg'];
     
     let imageUrl = 'http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/201593_Branded_Prospect_Stream_2022_Day_8_Diet/Lifestyle/121321_Branded_Prospect_Stream_Day_18_Email_02.png';
-
+    var httpsUrl = imageUrl.replace("http://", "https://");
     var filename = imageUrl.substring(imageUrl.lastIndexOf('/')+1);
     var xhr = new XMLHttpRequest();
-    xhr.open("GET", imageUrl, true);
+    xhr.open("GET", httpsUrl, true);
     xhr.responseType = "blob";
 
     xhr.onload = function() {
