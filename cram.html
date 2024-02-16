@@ -12,14 +12,7 @@
 
 <script>
 function downloadImages() {
-    // var imageUrlsTextarea = document.getElementById('imageUrls');
-    // var imageUrls = imageUrlsTextarea.value.split('\n').map(url => url.trim()).filter(Boolean);
-    var imageUrls=['http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/201593_Branded_Prospect_Stream_2022_Day_8_Diet/Lifestyle/121321_Branded_Prospect_Stream_Day_18_Email_02.png','http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/201593_Branded_Prospect_Stream_2022_Day_8_Diet/Lifestyle/121321_Branded_Prospect_Stream_Day_18_Email_04.png','http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/201593_Branded_Prospect_Stream_2022_Day_8_Diet/Lifestyle/121321_Branded_Prospect_Stream_Day_18_Email_03.png']
-
-    // if (imageUrls.length === 0) {
-    //     alert('Please enter at least one image URL.');
-    //     return;
-    // }
+    let imageUrls=['http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/201593_Branded_Prospect_Stream_2022_Day_8_Diet/Lifestyle/121321_Branded_Prospect_Stream_Day_18_Email_02.png','http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/201593_Branded_Prospect_Stream_2022_Day_8_Diet/Lifestyle/121321_Branded_Prospect_Stream_Day_18_Email_04.png','http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/201593_Branded_Prospect_Stream_2022_Day_18_Diet/Lifestyle/MEADOW_LEAVES_3248_n.jpg']
 
     imageUrls.forEach((imageUrl, index) => {
         var allOriginsUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(imageUrl);
@@ -27,8 +20,8 @@ function downloadImages() {
         fetch(allOriginsUrl)
         .then(response => response.blob())
         .then(blob => {
-            var url = window.URL.createObjectURL(blob);
-            var a = document.createElement('a');
+            let url = window.URL.createObjectURL(blob);
+            let a = document.createElement('a');
             a.href = url;
             a.download = 'image_' + index;
             document.body.appendChild(a);
