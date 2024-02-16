@@ -44,7 +44,7 @@ function downloadImages() {
     loaderBar.style.width = '0';
 
     imageUrls.forEach((imageUrl, index) => {
-        var allOriginsUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(imageUrl);
+        var allOriginsUrl = imageUrl;
 
         fetch(allOriginsUrl)
         .then(response => response.blob())
