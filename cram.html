@@ -9,7 +9,7 @@
 
 <textarea id="imageUrls" placeholder="Enter image URLs (one per line)"></textarea>
 <button onclick="downloadImages()">Download Images</button>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
 <script>
 function downloadImages() {
     let imageUrls=['http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/201593_Branded_Prospect_Stream_2022_Day_8_Diet/Lifestyle/121321_Branded_Prospect_Stream_Day_18_Email_02.png','http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/201593_Branded_Prospect_Stream_2022_Day_8_Diet/Lifestyle/121321_Branded_Prospect_Stream_Day_18_Email_04.png','http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/201593_Branded_Prospect_Stream_2022_Day_18_Diet/Lifestyle/MEADOW_LEAVES_3248_n.jpg']
@@ -23,14 +23,11 @@ function downloadImages() {
         fetch(allOriginsUrl)
         .then(response => response.blob())
         .then(blob => {
-            // Extract filename from the URL
             var filename = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
-            // Add image to the zip file
             zip.file(filename, blob);
             count++;
 
             if (count === imageUrls.length) {
-                // Generate the zip file once all images are added
                 zip.generateAsync({ type: 'blob' })
                 .then(function(content) {
                     var url = window.URL.createObjectURL(content);
