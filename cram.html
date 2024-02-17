@@ -48,7 +48,6 @@ async function downloadImages() {
     'http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/20211717_CDE_Unbranded_Consumer_Campaign/images/CS0188025_Circle_Chart.png',
     'http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/20211717_CDE_Unbranded_Consumer_Campaign/images/CS0188025_Circle_Chart_M.png'                             
 ];
-
     var totalImages = imageUrls.length;
     var downloadedImages = 0;
 
@@ -64,18 +63,18 @@ async function downloadImages() {
     }
 }
 
-function fetchImage(imageUrl, totalImages) {
-    return new Promise((resolve, reject) => {
-        var allOriginsUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(imageUrl);
+async function fetchImage(imageUrl, totalImages) {
+    var allOriginsUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(imageUrl);
+    var retryCount = 0;
+    var maxRetries = 3;
 
-        fetch(allOriginsUrl)
-        .then(response => {
+    while (retryCount < maxRetries) {
+        try {
+            const response = await fetch(allOriginsUrl);
             if (!response.ok) {
                 throw new Error('Network response was not ok');
             }
-            return response.blob();
-        })
-        .then(blob => {
+            const blob = await response.blob();
             var filename = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
             var url = window.URL.createObjectURL(blob);
             var a = document.createElement('a');
@@ -85,13 +84,15 @@ function fetchImage(imageUrl, totalImages) {
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
-            resolve();
-        })
-        .catch(error => {
+            return;
+        } catch (error) {
             console.error('Error downloading image:', error);
-            reject(error);
-        });
-    });
+            retryCount++;
+            console.log(`Retrying fetch for ${imageUrl}. Retry ${retryCount} of ${maxRetries}`);
+        }
+    }
+
+    throw new Error(`Failed to download image after ${maxRetries} retries: ${imageUrl}`);
 }
 </script>
 
