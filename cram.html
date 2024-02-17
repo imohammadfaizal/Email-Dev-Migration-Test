@@ -28,7 +28,7 @@
 </div>
 
 <script>
-function downloadImages() {
+async function downloadImages() {
     var imageUrls = [
     'http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/201593_Branded_Prospect_Stream_2022_Day_8_Diet/Lifestyle/121321_Branded_Prospect_Stream_Day_18_Email_02.png',
     'http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/20211717_CDE_Unbranded_Consumer_Campaign/images/CS0188025_TOP_Scemblix_Logo.png',
@@ -52,43 +52,45 @@ function downloadImages() {
     var totalImages = imageUrls.length;
     var downloadedImages = 0;
 
-    imageUrls.forEach((imageUrl, index) => {
-        fetchImage(imageUrl, totalImages);
-    });
+    try {
+        await Promise.all(imageUrls.map(async (imageUrl, index) => {
+            await fetchImage(imageUrl, totalImages);
+            downloadedImages++;
+            var progressBar = document.getElementById('progressBar');
+            progressBar.style.width = (downloadedImages / totalImages) * 100 + '%';
+        }));
+    } catch (error) {
+        console.error('Error downloading images:', error);
+    }
 }
 
 function fetchImage(imageUrl, totalImages) {
-    var allOriginsUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(imageUrl);
-    var progressBar = document.getElementById('progressBar');
+    return new Promise((resolve, reject) => {
+        var allOriginsUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(imageUrl);
 
-    fetch(allOriginsUrl)
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.blob();
-    })
-    .then(blob => {
-        var filename = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
-        var url = window.URL.createObjectURL(blob);
-        var a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-
-        // Update progress
-        var downloadedImages = document.querySelectorAll('.progress').length;
-        progressBar.style.width = (downloadedImages / totalImages) * 100 + '%';
-    })
-    .catch(error => {
-        console.error('Error downloading image:', error);
-        // Retry fetching the image after 1 second
-        setTimeout(() => {
-            fetchImage(imageUrl, totalImages);
-        }, 1000);
+        fetch(allOriginsUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            var filename = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            resolve();
+        })
+        .catch(error => {
+            console.error('Error downloading image:', error);
+            reject(error);
+        });
     });
 }
 </script>
