@@ -53,27 +53,42 @@ function downloadImages() {
     var downloadedImages = 0;
 
     imageUrls.forEach((imageUrl, index) => {
-        var allOriginsUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(imageUrl);
+        fetchImage(imageUrl, totalImages);
+    });
+}
 
-        fetch(allOriginsUrl)
-        .then(response => response.blob())
-        .then(blob => {
-            var filename = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
-            var url = window.URL.createObjectURL(blob);
-            var a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
+function fetchImage(imageUrl, totalImages) {
+    var allOriginsUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(imageUrl);
+    var progressBar = document.getElementById('progressBar');
 
-            // Update progress
-            downloadedImages++;
-            var progressBar = document.getElementById('progressBar');
-            progressBar.style.width = (downloadedImages / totalImages) * 100 + '%';
-        })
-        .catch(error => console.error('Error downloading image:', error));
+    fetch(allOriginsUrl)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.blob();
+    })
+    .then(blob => {
+        var filename = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
+        var url = window.URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        // Update progress
+        var downloadedImages = document.querySelectorAll('.progress').length;
+        progressBar.style.width = (downloadedImages / totalImages) * 100 + '%';
+    })
+    .catch(error => {
+        console.error('Error downloading image:', error);
+        // Retry fetching the image after 1 second
+        setTimeout(() => {
+            fetchImage(imageUrl, totalImages);
+        }, 1000);
     });
 }
 </script>
