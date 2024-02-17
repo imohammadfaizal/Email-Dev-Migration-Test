@@ -8,9 +8,8 @@
 <body>
 
 <textarea id="imageUrls" placeholder="Enter image URLs (one per line)"></textarea>
-<button onclick="downloadImages()">Download Images as Zip</button>
+<button onclick="downloadImages()">Download Images</button>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
 <script>
 function downloadImages() {
     var imageUrls = ['http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/201593_Branded_Prospect_Stream_2022_Day_8_Diet/Lifestyle/121321_Branded_Prospect_Stream_Day_18_Email_02.png',
@@ -32,35 +31,20 @@ function downloadImages() {
     'http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/20211717_CDE_Unbranded_Consumer_Campaign/images/CS0188025_Circle_Chart_M.png'                             
 ];
 
-    var zip = new JSZip();
-    var count = 0;
-
     imageUrls.forEach((imageUrl, index) => {
         var allOriginsUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(imageUrl);
 
         fetch(allOriginsUrl)
         .then(response => response.blob())
         .then(blob => {
-            // Extract filename from the URL
-            var filename = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
-            // Add image to the zip file
-            zip.file(filename, blob);
-            count++;
-
-            if (count === imageUrls.length) {
-                // Generate the zip file once all images are added
-                zip.generateAsync({ type: 'blob' })
-                .then(function(content) {
-                    var url = window.URL.createObjectURL(content);
-                    var a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'images.zip';
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    window.URL.revokeObjectURL(url);
-                });
-            }
+            var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'image_' + index;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
         })
         .catch(error => console.error('Error downloading image:', error));
     });
