@@ -37,10 +37,11 @@ function downloadImages() {
         fetch(allOriginsUrl)
         .then(response => response.blob())
         .then(blob => {
+            var filename = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
             var url = window.URL.createObjectURL(blob);
             var a = document.createElement('a');
             a.href = url;
-            a.download = 'image_' + index;
+            a.download = filename;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
