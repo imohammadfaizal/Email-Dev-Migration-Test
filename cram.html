@@ -4,11 +4,28 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Multiple Image Downloader</title>
+<style>
+/* CSS for the linear loader */
+.loader {
+  width: 100%;
+  height: 20px;
+  background-color: #f3f3f3;
+}
+
+.progress {
+  width: 0%;
+  height: 100%;
+  background-color: #4caf50;
+}
+</style>
 </head>
 <body>
 
 <textarea id="imageUrls" placeholder="Enter image URLs (one per line)"></textarea>
 <button onclick="downloadImages()">Download Images</button>
+<div class="loader">
+  <div id="progressBar" class="progress"></div>
+</div>
 
 <script>
 function downloadImages() {
@@ -32,6 +49,9 @@ function downloadImages() {
     'http://images.harmony.epsilon.com/ContentHandler/images/263f4ea1-4cf5-4c5e-a8d9-ae73663e97af/20211717_CDE_Unbranded_Consumer_Campaign/images/CS0188025_Circle_Chart_M.png'                             
 ];
 
+    var totalImages = imageUrls.length;
+    var downloadedImages = 0;
+
     imageUrls.forEach((imageUrl, index) => {
         var allOriginsUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(imageUrl);
 
@@ -47,6 +67,11 @@ function downloadImages() {
             a.click();
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
+
+            // Update progress
+            downloadedImages++;
+            var progressBar = document.getElementById('progressBar');
+            progressBar.style.width = (downloadedImages / totalImages) * 100 + '%';
         })
         .catch(error => console.error('Error downloading image:', error));
     });
