@@ -56,9 +56,11 @@ let handleExtraction = async function () {
             if (IMGBgelems[d].getAttribute("background")) IMGmatches.set(IMGBgelems[d].getAttribute("background"), "");
         }
     }
+    if(document.getElementsByClassName("image-picker")[0].innerHTML === ''){
+        handleImageDownload(IMGmatches); //Added For Image Download
+    }
     $(".image-picker").html('');
     await populateImageGallery(IMGmatches);
-    handleImageDownload(IMGmatches); //Added For Image Download
     handleImageUpdate();
 }
 
