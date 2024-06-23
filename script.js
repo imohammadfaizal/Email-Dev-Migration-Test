@@ -11,7 +11,16 @@ let HREF;
 let newUrl;
 let fileToUpload;
 document.getElementById('upload-file').addEventListener('change', handleFileUpload, false);
-$("#original-file").keyup(() => { $("#submit-btn").removeClass("disabled"); })
+document.getElementById('upload-csv').addEventListener('change', handleCSVUpload, false);
+$("#original-file").keyup(() => { 
+    if($("#original-file").val()) {
+         $("#submit-btn").removeClass("disabled"); 
+         $("#dummy-wrapper").addClass("d-none"); 
+     } 
+     else{
+        $("#submit-btn").addClass("disabled") 
+    }
+})
 
 function iframeCodeUpdate(codeToUpdate) {
     wrapper.innerHTML = iframeHTML;
@@ -43,6 +52,152 @@ let handleEventsInAnchor = function () {
     }
 }
 
+let handleAnchorHighlight = function (evt) {
+    $(".hidden-anchor-modal").click();
+    let anchorModalBody = document.getElementById("inner-anchor-modal-body");
+    anchorModalBody.innerHTML = '';
+
+    let fragment = document.createDocumentFragment();
+
+    HREF.forEach((href, index) => {   
+        let container = document.createElement('div');
+        container.className = 'iframe-input-container';
+
+        let iframe = document.createElement('iframe');
+        iframe.id = `iframe-anchor-${index + 1}`;
+        iframe.height = '50';
+        iframe.className = 'anchor-iframe';
+        iframe.scrolling = 'no';
+        iframe.srcdoc = `<div class="iframe-inner-container">${href.outerHTML}</div>`;
+        container.appendChild(iframe);
+
+        let inputContainer = document.createElement('div');
+        inputContainer.className = 'input-container';
+
+        let currentUrlField = document.createElement('input');
+        currentUrlField.type = 'text';
+        currentUrlField.value = href.href;
+        currentUrlField.readOnly = true;
+        currentUrlField.id = `current-anchor-${index + 1}`;
+        currentUrlField.className = 'current-url form-control';
+        inputContainer.appendChild(currentUrlField);
+
+        let inputField = document.createElement('input');
+        inputField.type = 'text';
+        inputField.id = `input-anchor-${index + 1}`;
+        inputField.placeholder = 'Enter new href';
+        inputField.className = 'new-url form-control';
+        inputContainer.appendChild(inputField);
+
+        let aliasField = document.createElement('input');
+        aliasField.type = 'text';
+        aliasField.id = `alias-anchor-${index + 1}`;
+        aliasField.placeholder = 'Enter alias';
+        aliasField.className = 'alias-url form-control';
+        aliasField.value = href.getAttribute("alias") || '';
+        inputContainer.appendChild(aliasField);
+
+        let copyButton = document.createElement('button');
+        copyButton.innerHTML = 'Copy';
+        copyButton.type = 'button';
+        copyButton.className = 'btn btn-secondary';
+        copyButton.onclick = () => { inputField.value = currentUrlField.value; };
+        inputContainer.insertBefore(copyButton, inputField);
+
+        let checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `checkbox-anchor-${index + 1}`;
+        checkbox.className = 'form-check-input';
+        checkbox.checked = true;
+        inputContainer.appendChild(checkbox);
+
+        container.appendChild(inputContainer);
+        fragment.appendChild(container);
+    });
+
+    anchorModalBody.appendChild(fragment);
+
+    document.getElementById("save-changes-anchor").onclick = function () {
+        HREF.forEach((href, index) => {
+            let checkbox = document.getElementById(`checkbox-anchor-${index + 1}`);
+            if (checkbox.checked) {
+                let newHref = document.getElementById(`input-anchor-${index + 1}`).value.trim();
+                let alias = document.getElementById(`alias-anchor-${index + 1}`).value.trim();
+                let mainIframe = document.getElementById('my-iframe');
+                let anchor = mainIframe.contentDocument.querySelectorAll('a')[index];
+
+                if (anchor && anchor.hasAttribute('href')) {
+                    anchor.href = newHref || href.href;
+                    if (alias) {
+                        anchor.setAttribute("alias", alias);
+                    } else {
+                        anchor.removeAttribute("alias");
+                    }
+                }
+            }
+        });
+        modifiedCode.value = HTMLDocStandard + "\n" + document.querySelector("iframe").contentDocument.documentElement.outerHTML;
+        line_counter('modified');
+        disableDownload();
+        $("#upload-csv").val("");
+    };
+};
+
+let anchorRefresh = function () {
+    HREF.forEach((href, index) => {
+        let currentUrlField = document.getElementById(`current-anchor-${index + 1}`);
+        currentUrlField.value = href.href;
+    })
+}
+
+function handleCSVUpload(event) {
+    const file = event.target.files[0];
+    if (file.type !== 'text/csv') {
+        alert('Please upload a CSV file.');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        const text = e.target.result;
+        const rows = text.split('\n').map(row => row.split(','));
+
+        const headers = rows.shift().map(header => header.trim().toLowerCase());
+        const newUrlIndex = headers.indexOf('new_url');
+        const aliasIndex = headers.indexOf('alias');
+
+        if (newUrlIndex === -1 || aliasIndex === -1) {
+            alert('CSV must contain "new-url" and "alias" columns.');
+            return;
+        }
+
+        let currentIndex = 0;
+
+        rows.forEach((columns) => {
+            const newUrl = columns[newUrlIndex]?.trim() || '';
+            const alias = columns[aliasIndex]?.trim() || '';
+
+            while (currentIndex < HREF.length) {
+                const currentUrlField = document.getElementById(`current-anchor-${currentIndex + 1}`);
+
+                if (currentUrlField && currentUrlField.value.trim() !== '') {
+                    const inputField = document.getElementById(`input-anchor-${currentIndex + 1}`);
+                    const aliasField = document.getElementById(`alias-anchor-${currentIndex + 1}`);
+
+                    if (inputField) inputField.value = newUrl;
+                    if (aliasField) aliasField.value = alias;
+
+                    currentIndex++;
+                    break;
+                }
+
+                currentIndex++;
+            }
+        });
+    };
+    reader.readAsText(file);
+}
+
 let handleExtraction = async function () {
     let IMGmatches = new Map();
     let j;
@@ -56,9 +211,9 @@ let handleExtraction = async function () {
             if (IMGBgelems[d].getAttribute("background")) IMGmatches.set(IMGBgelems[d].getAttribute("background"), "");
         }
     }
-    if(document.getElementsByClassName("image-picker")[0].innerHTML === ''){
-        handleImageDownload(IMGmatches); //Added For Image Download
-    }
+    // if(document.getElementsByClassName("image-picker")[0].innerHTML === ''){
+    //     handleImageDownload(IMGmatches); //Added For Image Download
+    // }
     $(".image-picker").html('');
     await populateImageGallery(IMGmatches);
     handleImageUpdate();
@@ -156,6 +311,7 @@ let handleHREFTrack = function () {
     modifiedCode.value = HTMLDocStandard + "\n" + document.querySelector("iframe").contentDocument.documentElement.outerHTML;
     line_counter('modified');
     disableDownload();
+    anchorRefresh();
 }
 
 $("#save-changes-url").click(() => {

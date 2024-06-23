@@ -219,6 +219,31 @@
             background-color: #4caf50; /* Green */
             transition: width 0.3s ease-in-out;
         }
+        #anchorModal{
+            --bs-modal-width: 1400px;
+        }
+        .iframe-input-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .input-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-evenly;
+            margin-left: 10px;
+            gap: 20px;
+        }
+        .current-url, .new-url {
+            width: 360px;
+        }
+        .alias-url{
+            width: 150px;
+        }
+        .anchor-iframe{
+            overflow: hidden;
+        }
 
     </style>
 </head>
@@ -264,13 +289,15 @@
                         title="Downloads Modified HTML file" disabled>Download HTML</a>
                     <div>
                         <button onclick="handleExtraction()" class="btn btn-dark w-100"
-                        title="Extract Images in Image Preview Tab">Extract & Download Images</button>
+                        title="Extract Images in Image Preview Tab">Extract Images</button>
                         <div class="loader-container">
                             <div id="loaderBar" class="loader-bar"></div>
                         </div>  
                     </div>      
-                    <button onclick="handleHREFTrack()" class="btn btn-dark"
-                        title="Removes Tracking URL from HREF Attribute">Remove Tracking URL</button>
+                    <!-- <button onclick="handleHREFTrack()" class="btn btn-dark"
+                        title="Removes Tracking URL from HREF Attribute">Remove Tracking URL</button> -->
+                    <button onclick="handleAnchorHighlight()" class="btn btn-dark"
+                        title="Highlights all the Anchor tag in the code">Link Update</button>      
                     <button onclick="handleAmpscript()" class="btn btn-dark" title="Removes Unwanted Ampscript">Remove
                         Ampscript</button>
                     <button onclick="handleToggleScreen(this)" data-bool="mobile"
@@ -426,6 +453,47 @@
                 </div>
             </div>
         </div>
+        <button type="button" class="btn btn-primary d-none hidden-anchor-modal" data-bs-toggle="modal"
+            data-bs-target="#anchorModal">
+            Launch demo modal
+        </button>
+        <div class="modal fade" id="anchorModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Link Updates</h5>
+                        <div class="d-flex gap-5 align-items-center">
+                            <div class="input-group" style="width: auto;" >
+                                <input type="file" class="form-control" id="upload-csv" aria-describedby="upload-btn"
+                                    aria-label="Upload" >
+                            </div>
+                            <button onclick="handleHREFTrack()" class="btn btn-dark" title="Removes Tracking URL from HREF Attribute">Remove Tracking URL</button>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="handleCloseUpload()"></button>
+                        </div>
+                    </div>
+                    <div class="modal-body d-flex flex-column justify-content-between gap-1">
+                        <div class="d-flex gap-1 flex-column" id="anchor-modal-body">
+                            <div class="d-flex justify-content-between">
+                                <span class="heading" style=" text-align: center; width: 300px; font-size: 20px; font-weight: bold;" >Preview</span>
+                                <span class="heading" style=" text-align: center; width: 360px; font-size: 20px; font-weight: bold;" >Current URL</span>
+                                <span class="heading" style=" text-align: center; width: 63px; font-size: 20px; font-weight: bold;" ></span>
+                                <span class="heading" style=" text-align: center; width: 360px; font-size: 20px; font-weight: bold;" >New URL</span>
+                                <span class="heading" style=" text-align: center; width: 150px; font-size: 20px; font-weight: bold;" >Alias</span>
+                                <span class="heading" style=" text-align: center; width: 16px; font-size: 20px; font-weight: bold;" ></span>
+                            </div>
+                            <div id="inner-anchor-modal-body">
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="handleCloseUpload()">Cancel</button>
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="save-changes-anchor">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
     </div>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
