@@ -4,6 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="cache-control" content="no-cache">
+    <meta http-equiv="expires" content="0">
+    <meta http-equiv="pragma" content="no-cache">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js" type="text/javascript"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
@@ -12,6 +15,12 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500&family=Playfair+Display:wght@600&family=Roboto+Slab:wght@500&family=Source+Code+Pro&display=swap"
         rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">   
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/image-picker/0.3.1/image-picker.min.css"
         integrity="sha512-eBMsZu/o2UFXJcFdYnG1zuuQcR6JYHTilXPXzI7UmSuTNUZYJbKXaQRrnRHLzA2UhMLoU1Weac9OAxE6pxlJMg=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -21,324 +30,189 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-toast-plugin/1.3.2/jquery.toast.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-toast-plugin/1.3.2/jquery.toast.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script>
+    <link rel="stylesheet" href="style.css">
     <title>Email Dev Migration</title>
-    <style>
-        .thumbnails {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: space-evenly;
-        }
-
-        .image-container {
-            background: url(./images/bg_check.avif);
-            background-size: cover;
-        }
-
-        .thumbnail {
-            background: url(./images/bg_check.avif);
-            background-size: contain;
-        }
-
-        .image_picker_selector li img {
-            width: 200px;
-            cursor: pointer;
-        }
-
-        ::-webkit-scrollbar {
-            position: absolute;
-            width: 7px;
-            height: 7px;
-            cursor: pointer !important;
-        }
-
-        ::-webkit-scrollbar-track {
-            margin: 10px 0px 5px 40px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #979292;
-            border-radius: 10px;
-            cursor: pointer !important;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgb(126, 126, 126);
-            cursor: pointer !important;
-        }
-
-        .jq-toast-wrap.bottom-right {
-            bottom: 10px !important;
-            right: 10px !important;
-        }
-
-        .close-jq-toast-single {
-            right: 5px !important;
-            font-size: 18px !important;
-            top: 2px !important;
-        }
-    </style>
-    <style>
-        .lineTextarea,
-        .codeTextarea {
-            font-family: lucida console, courier new, courier, monospace;
-            margin: 0;
-            padding: 10px 0;
-            height: 305px;
-            border-radius: 0;
-            resize: none;
-            font-size: 10px;
-            line-height: 1.2;
-            outline: none;
-            -moz-box-sizing: border-box;
-            -webkit-box-sizing: border-box;
-            box-sizing: border-box;
-            cursor: auto;
-            overflow-y: scroll;
-            scrollbar-gutter: stable;
-        }
-
-        .h-header {
-            height: 305px;
-        }
-
-        .codeTextarea {
-            padding-left: calc(2rem + 5px);
-            width: 100%;
-            background-color: #282a3a;
-            border-color: #282a3a;
-            color: #ffffff;
-        }
-
-        .lineTextarea {
-            display: flex;
-            border-color: transparent;
-            overflow: hidden;
-            text-align: right;
-            box-shadow: none;
-            color: #282a3a;
-            background-color: #282a3a;
-            position: absolute;
-            width: 2rem;
-            background-color: #282a3a;
-            border-color: #282a3a;
-            color: #506882;
-
-        }
-
-        #lineCounter:focus-visible,
-        #codeEditor:focus-visible {
-            outline: none;
-        }
-
-        #original-image-url,
-        #updated-image-url,
-        #original-image-alt,
-        #updated-image-alt {
-            font-family: lucida console, courier new, courier, monospace;
-            font-size: 10px;
-            line-height: 1.2;
-            resize: none;
-            border: 1px solid #c18e8e;
-        }
-
-        #new-url::placeholder,
-        #alias::placeholder,
-        #current-url::placeholder,
-        #updated-image-url::placeholder,
-        #updated-image-alt::placeholder {
-            /* color: #dddbdb; */
-            color: #c5bebe;
-        }
-
-        .fs-7 {
-            font-size: small;
-        }
-
-        #drop-zone {
-            z-index: -1;
-            /* background-color: #3a3a3adb; */
-            border-radius: 5px;
-        }
-
-        #drop-animation {
-            background-color: #3a3a3adb;
-            border-radius: 5px;
-        }
-
-        #upload-icon {
-            width: 50px;
-            height: 50px;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            animation: upload 1s infinite reverse ease-out;
-        }
-
-        #upload-text {
-            color: #b3f3f5d4;
-            bottom: 20%;
-            left: 50%;
-            font-size: 20px;
-            width: 393px;
-            transform: translate(-50%, -50%);
-        }
-
-        @keyframes upload {
-            0% {
-                left: 50%;
-                top: 50%;
-                transform: translate(-50%, -50%);
-            }
-
-            /* 25%  {left: 50%; top: 55%; transform: translate(-50%, -50%); } */
-            50% {
-                left: 50%;
-                top: 55%;
-                transform: translate(-50%, -50%);
-            }
-
-            /* 75%  {left: 50%; top: 55%; transform: translate(-50%, -50%); } */
-            100% {
-                left: 50%;
-                top: 50%;
-                transform: translate(-50%, -50%);
-            }
-        }
-
-        .loader-container {
-            width: 100%;
-            height: 2px;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .loader-bar {
-            width: 0;
-            height: 100%;
-            background-color: #4caf50; /* Green */
-            transition: width 0.3s ease-in-out;
-        }
-        #anchorModal{
-            --bs-modal-width: 1400px;
-        }
-        .iframe-input-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-        .input-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-evenly;
-            margin-left: 10px;
-            gap: 20px;
-        }
-        .current-url, .new-url {
-            width: 360px;
-        }
-        .alias-url{
-            width: 150px;
-        }
-        .anchor-iframe{
-            overflow: hidden;
-        }
-
-    </style>
 </head>
 
 <body>
-    <div class="container-fluid">
-        <div class="d-flex gap-1">
-            <div class="d-flex flex-column align-items-center col-5">
-                <h3 style="font-family: 'Roboto Slab', serif;">Original Code</h3>
-                <div class="editor w-100 position-relative">
-                    <div class="rounded h-header">
-                        <textarea class="lineTextarea" id="original-line-counter" style="border-radius: 5px;" wrap='off'
-                            readonly>1.</textarea>
-                        <textarea class="codeTextarea" style="border-radius: 5px;" oninput="line_counter('original')"
-                            onscroll="line_scroll('original')" id="original-file"
-                            placeholder="Please paste the original code here..." wrap='off'
-                            ondragover="dragOverTextarea(event);"></textarea>
-                    </div>
-                    <div>
-                        <div id="drop-zone" class="position-absolute w-100 h-100 top-0"
-                            ondrop="dropOverDropzone(event);" ondragover="dragOverDropzone(event);"
-                            ondragleave="dragLeaveDropzone(event)">
-                        </div>
-                        <div id="drop-animation" class="position-absolute top-0 w-100 h-100 d-none">
-                            <div id="upload-icon" class="position-absolute">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
-                                    <path
-                                        d="M144 480C64.5 480 0 415.5 0 336c0-62.8 40.2-116.2 96.2-135.9c-.1-2.7-.2-5.4-.2-8.1c0-88.4 71.6-160 160-160c59.3 0 111 32.2 138.7 80.2C409.9 102 428.3 96 448 96c53 0 96 43 96 96c0 12.2-2.3 23.8-6.4 34.6C596 238.4 640 290.1 640 352c0 70.7-57.3 128-128 128H144zm79-217c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l39-39V392c0 13.3 10.7 24 24 24s24-10.7 24-24V257.9l39 39c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-80-80c-9.4-9.4-24.6-9.4-33.9 0l-80 80z" />
-                                </svg>
-                            </div>
-                            <div class="position-absolute bottom-25 left-50 fw-bolder" id="upload-text">Drop HTML file
-                                here to upload your code.</div>
-                        </div>
-                    </div>
+    <div class="container-fluid pt-4 pb-3 px-5 d-flex flex-column h-100">
+        <div id="header-container" class="pb-3 border-bottom d-flex justify-content-between overflow-hidden">
+            <div class="logo-container transition">
+                <div>
+                    <span class="material-symbols-outlined fw-bold color-purple" style="font-size: 60px; line-height: 60px; ">person_remove</span>
                 </div>
+                <div style="font-size: 40px; line-height: 40px;" class="fw-bold color-purple">Email Code Migration</div>
             </div>
-            <div class="d-flex flex-column col-2">
-                <h3 style="visibility: hidden;">Haha</h3>
-                <div class="d-flex flex-column justify-content-between h-header">
-                    <button onclick="handleSubmit()" class="btn btn-dark disabled" id="submit-btn"
-                        title="Submit to Generate Preview">Submit and Preview</button>
-                    <a id="download-btn" href="no-script.html" class="btn btn-dark disabled"
-                        title="Downloads Modified HTML file" disabled>Download HTML</a>
-                    <div>
-                        <button onclick="handleExtraction()" class="btn btn-dark w-100"
-                        title="Extract Images in Image Preview Tab">Extract Images</button>
-                        <div class="loader-container">
-                            <div id="loaderBar" class="loader-bar"></div>
-                        </div>  
-                    </div>      
-                    <!-- <button onclick="handleHREFTrack()" class="btn btn-dark"
-                        title="Removes Tracking URL from HREF Attribute">Remove Tracking URL</button> -->
-                    <button onclick="handleAnchorHighlight()" class="btn btn-dark"
-                        title="Highlights all the Anchor tag in the code">Link Update</button>      
-                    <button onclick="handleAmpscript()" class="btn btn-dark" title="Removes Unwanted Ampscript">Remove
-                        Ampscript</button>
-                    <button onclick="handleToggleScreen(this)" data-bool="mobile"
-                        title="Toggles iFrame to Mobile Screen" class="btn btn-danger"
-                        title="Toggle Screen Sizes">Toggle to Mobile Screen</button>
-                    <div class="input-group">
-                        <input type="file" class="form-control" id="upload-file" aria-describedby="upload-btn"
-                            aria-label="Upload">
-                    </div>
+            <div class="d-flex flex-column gap-3 header-button-container justify-content-end d-none">
+                <div class="d-flex justify-content-end">
+                    <button class="btn btn-dark position-relative save-changes-btn text-light bg-purple"><span style="vertical-align: bottom;" class="material-symbols-outlined pe-2">upload</span>Create a new test <input class="cursor-pointer position-absolute top-0 start-0 opacity-0" type="file" name="" id="upload-new-file"></button>
                 </div>
-            </div>
-            <div class="d-flex flex-column align-items-center col-5">
-                <h3 style="font-family: 'Roboto Slab', serif;">Modified Code</h3>
-                <div class="editor w-100">
-                    <div class="rounded h-header">
-                        <textarea class="lineTextarea" id='modified-line-counter' style="border-radius: 5px;" wrap='off'
-                            readonly>1.</textarea>
-                        <textarea class="codeTextarea" style="border-radius: 5px;" oninput="line_counter('modified')"
-                            onscroll="line_scroll('modified')" id='modified-file' wrap='off'></textarea>
-                    </div>
+                <div class="d-flex gap-3">
+                    <a href="no-script.html" class="btn btn-light border border-purple disabled color-purple download-btn" title="Downloads Modified HTML file" disabled><span style="vertical-align: bottom;" class="material-symbols-outlined pe-2 color-purple">Download</span>Download HTML</a>
+                    <a href="https://automation.epsilon.com/checkmate/home" target="_blank" class="btn btn-light border border-purple color-purple" title="Validates HTML file"><span style="vertical-align: bottom;" class="material-symbols-outlined pe-2 color-purple">mobile_friendly</span>Email Validation</a>
+                    <a href="https://smalldev.tools/html-formatter-online" target="_blank" class="btn btn-light border border-purple color-purple" title="Source FOrmatter for HTML file"><span style="vertical-align: bottom;" class="material-symbols-outlined pe-2 color-purple">format_list_bulleted</span>Source Format</a>
+                    <a href="https://htmlcompressor.com/compressor/" target="_blank" class="btn btn-light border border-purple color-purple" title="Compress Size of HTML file"><span style="vertical-align: bottom;" class="material-symbols-outlined pe-2 color-purple">description</span>Compress Size</a>
+                    <!-- <button class="btn btn-light border border-purple color-purple" id="unclosed-tag-finder-button"><span style="vertical-align: bottom;" class="material-symbols-outlined pe-2 color-purple">description</span>Validation</button> -->
                 </div>
             </div>
         </div>
-        <div class="d-flex gap-3">
-            <div class="d-flex flex-column align-items-center w-50">
-                <h3 class="m-0 pb-2" style="font-family: 'Roboto Slab', serif;">Email Preview</h3>
-                <div
-                    class="position-relative w-100 border rounded d-flex flex-column justify-content-center align-items-center">
-                    <div id="wrapper" class="align-self-center pt-2" style="width: 100%; height: 1000px;">
-                        <iframe id="my-iframe" height="1000" class="w-100 d-none"></iframe>
+        <div class="d-none" id="unclosed-tag-finder-code"></div>
+        <div id="unclosed-tag-finder-results"></div>
+
+
+        <div class="content-container d-flex flex-column pt-3 position-relative">
+            <div id="sidebar" class="sidebar transition">
+                <ul class="menu ps-0">
+                    <li class="side-menu py-2 ps-4 border-bottom bg-purple">
+                        <div class="d-flex gap-3">
+                            <div class="d-flex flex-column">
+                                <!-- <div class="fw-bold text-light" style="font-size: 19px; line-height: 29px;" >Current File ESP</div> -->
+                                <div class="fw-bold text-light" id="file-name" style="font-size: 19px; line-height: 29px;" ></div>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="side-menu py-3 ps-3 border-bottom">
+                        <div class="d-flex gap-3">
+                            <div class="d-flex">
+                                <span class="material-symbols-outlined color-purple" style="font-size: 60px; ">delete</span>
+                            </div>
+                            <div class="d-flex flex-column">
+                                <div class="side-menu-label color-purple fw-bold">Personalisation</div>
+                                <!-- <div class="side-menu-label color-purple pt-2">Header</div> -->
+                                <div class="side-menu-label color-purple text-decoration-underline pt-1 cursor-pointer" onclick="handleAmpscript()">Remove Personalisation</div>
+                                <div class="side-menu-label color-purple pt-2 text-decoration-underline cursor-pointer" onclick="handleHREFTrack()" class="btn btn-dark"
+                                title="Highlights all the Anchor tag in the code">Remove Tracking URL</div>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="side-menu py-3 ps-3 border-bottom">
+                        <div class="d-flex gap-3">
+                            <div class="d-flex">
+                                <span class="material-symbols-outlined color-purple" style="font-size: 60px; ">language</span>
+                            </div>
+                            <div class="d-flex flex-column">
+                                <div class="side-menu-label color-purple fw-bold">Links</div>
+                                <div class="side-menu-label color-purple text-decoration-underline pt-1 cursor-pointer" onclick="handleAnchorHighlight()" class="btn btn-dark"
+                                title="Highlights all the Anchor tag in the code">Manual Update</div>
+                                <div class="side-menu-label color-purple text-decoration-underline pt-1 cursor-pointer position-relative" >Document Upload
+                                    <input type="file" class="form-control cursor-pointer position-absolute top-0 start-0 opacity-0 w-100" id="upload-csv" aria-describedby="upload-btn"
+                                    aria-label="Upload" >
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="side-menu py-3 ps-3 border-bottom">
+                        <div class="d-flex gap-3">
+                            <div class="d-flex">
+                                <span class="material-symbols-outlined color-purple" style="font-size: 60px; ">image</span>
+                            </div>
+                            <div class="d-flex flex-column">
+                                <div class="side-menu-label color-purple fw-bold">Images</div>
+                                <div class="side-menu-label color-purple pt-2 text-decoration-underline cursor-pointer" onclick="handleImageExtraction()" title="Preview Images">Preview Images</div>
+                                <div class="side-menu-label color-purple pt-1">Download Images</div>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="side-menu py-3 ps-3 border-bottom">
+                        <div class="d-flex gap-3">
+                            <div class="d-flex">
+                                <span class="material-symbols-outlined color-purple" style="font-size: 60px; ">integration_instructions</span>
+                            </div>
+                            <div class="d-flex flex-column">
+                                <div class="side-menu-label color-purple fw-bold">Code Compare</div>
+                                <div class="side-menu-label color-purple pt-2 text-decoration-underline cursor-pointer btn p-0 border-0 disabled" id="code-compare" onclick="handleCodeCompare()" title="Toggle for Code Comaparison">Existing vs New</div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="code-editor flex-column">
+                <div id="nav-tabs-container" class="d-flex justify-content-center">
+                    <ul class="nav nav-tabs">
+                        <li class="nav-item ">
+                          <a class="fw-bold border-bottom nav-link color-purple border-top border rounded-end-0 active code-btn cursor-pointer" aria-current="page" style="font-size: 17px;" tab="iframe-container" >Code</a>
+                        </li>
+                        <li class="nav-item">
+                          <a class="fw-bold nav-link color-purple border rounded-0 cursor-pointer" style="font-size: 17px;" tab="editor-container" onclick="handleToggleScreen(this)" data-bool="mobile" >Mobile</a>
+                        </li>
+                        <li class="nav-item">
+                          <a class="fw-bold nav-link color-purple border border-end rounded-start-0 cursor-pointer" style="font-size: 17px;" onclick="handleToggleScreen(this)" data-bool="desktop" tab="editor-container" >Desktop</a>
+                        </li>
+                      </ul>
+                </div>
+                <div class="inner-header-button-proxy-container d-flex justify-content-around d-none border rounded-top">
+                    <div class="fw-bold fs-5 d-none inner-original-btn color-purple" >Original</div>
+                    <div class="fw-bold fs-5 d-none inner-modified-btn color-purple" >Modified</div>
+                </div>
+                <div id="editor-container" class="position-relative tab-menu editor w-100 position-relative" style="flex-grow: 1;">
+                    <div class="h-100" id="original-code-container">
+                        <div class="rounded h-header">
+                            <textarea class="lineTextarea" id="original-line-counter" style="border-radius: 5px;" wrap='off'
+                                readonly>1.</textarea>
+                            <textarea class="codeTextarea" style="border-radius: 5px;" oninput="line_counter('original')"
+                                onscroll="line_scroll('original')" id="original-file"
+                                placeholder="Please paste the original code here..." wrap='off'
+                                ondragover="dragOverTextarea(event);"></textarea>
+                        </div>
+                        <div id="upload-container">
+                            <div class="position-absolute top-50 start-50" ondragover="dragOverTextarea(event);">
+                                <div class="position-absolute bottom-50 start-50 fw-bolder translate-middle" style="width: 325px;"><div class="input-group">
+                                    <input type="file" class="form-control rounded-pill" id="upload-file" aria-describedby="upload-btn"
+                                        aria-label="Upload">
+                                </div></div>
+                            </div>
+                        </div>
+                        <div id="drop-container">
+                            <div id="drop-zone" class="position-absolute w-100 h-100 top-0"
+                                ondrop="dropOverDropzone(event);" ondragover="dragOverDropzone(event);"
+                                ondragleave="dragLeaveDropzone(event)">
+                            </div>
+                            <div id="drop-animation" class="position-absolute top-0 w-100 h-100 d-none">
+                                <div id="upload-icon" class="position-absolute">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512">
+                                        <path
+                                            d="M144 480C64.5 480 0 415.5 0 336c0-62.8 40.2-116.2 96.2-135.9c-.1-2.7-.2-5.4-.2-8.1c0-88.4 71.6-160 160-160c59.3 0 111 32.2 138.7 80.2C409.9 102 428.3 96 448 96c53 0 96 43 96 96c0 12.2-2.3 23.8-6.4 34.6C596 238.4 640 290.1 640 352c0 70.7-57.3 128-128 128H144zm79-217c-9.4 9.4-9.4 24.6 0 33.9s24.6 9.4 33.9 0l39-39V392c0 13.3 10.7 24 24 24s24-10.7 24-24V257.9l39 39c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-80-80c-9.4-9.4-24.6-9.4-33.9 0l-80 80z" />
+                                    </svg>
+                                </div>
+                                <div class="position-absolute bottom-25 left-50 fw-bolder" id="upload-text">Drop HTML file
+                                    here to upload your code.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-column align-items-center h-100 d-none" id="modified-code-container">
+                        <div class="editor w-100 h-100">
+                            <div class="rounded h-header">
+                                <textarea class="lineTextarea" id='modified-line-counter' style="border-radius: 5px;" wrap='off'
+                                    readonly>1.</textarea>
+                                <textarea class="codeTextarea" style="border-radius: 5px;" oninput="line_counter('modified')"
+                                    onscroll="line_scroll('modified')" id='modified-file' wrap='off' readonly></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex position-absolute bottom-0 end-0 d-none" id="download-btn-container">
+                        <div id="copy-btn" class="btn btn-light border border-purple disabled color-purple" title="Copies HTML Code"><span class="material-symbols-outlined">content_copy</span></div>
+                        <a href="no-script.html" class="btn btn-light border border-purple disabled color-purple download-btn" title="Downloads Modified HTML file"><span style="vertical-align: bottom;" class="material-symbols-outlined pe-0 color-purple">Download</span></a>
+                    </div>
+                </div>
+                <div id="iframe-container" class="tab-menu d-none position-relative w-100 border border-top-0 rounded-bottom d-flex justify-content-around align-items-center px-3 pb-3 gap-3" style="flex-grow: 1;">
+                    <div id="original-wrapper" class="d-none wrapper align-self-center pt-2 d-flex h-100" style="width: 100%; ">
+                        <iframe id="original-iframe" class="w-100 d-none"></iframe>
+                    </div>
+                    <div id="modified-wrapper" class="wrapper align-self-center pt-2 d-flex h-100" style="width: 100%; ">
+                        <iframe id="modified-iframe" class="w-100 d-none"></iframe>
                     </div>
                     <div id="dummy-wrapper" class="position-absolute top-0 w-100 h-100"></div>
                 </div>
             </div>
-            <div class="d-flex flex-column align-items-center w-50 ">
-                <h3 class="m-0 pb-2" style="font-family: 'Roboto Slab', serif;">Image Preview</h3>
-                <div class="picker w-100 border p-3 rounded" style="height: 1000px; overflow: scroll;">
-                    <select class="image-picker show-html" style="display: none;"></select>
-                </div>
+            <div class="d-flex justify-content-center pt-3" id="submit-container">
+                <button onclick="handleSubmit()" class="btn save-changes-btn text-light bg-purple disabled" id="submit-btn" title="Submit to Generate Preview">Submit and Preview</button>
             </div>
+    
         </div>
+
+
+
+        
         <button type="button" class="btn btn-primary hidden-link-modal" data-bs-toggle="modal"
             data-bs-target="#linkUpdateModal" style="display: none;">Launch demo modal</button>
         <div class="modal fade" id="linkUpdateModal" tabindex="-1" aria-labelledby="exampleModalLabel"
@@ -376,60 +250,6 @@
                 </div>
             </div>
         </div>
-        <button type="button" class="btn btn-primary hidden-image-modal" data-bs-toggle="modal"
-            data-bs-target="#imageUpdateModal" style="display: none;">Launch demo modal</button>
-        <div class="modal fade" id="imageUpdateModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title fw-bold" id="exampleModalLabel">Image Update</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body d-flex flex-column justify-content-between gap-1">
-                        <div class="d-flex gap-2 flex-column">
-                            <div class="d-flex gap-2">
-                                <h5 class="w-50 m-0 text-center">Original Image</h5>
-                                <h5 class="w-50 m-0 text-center">Updated Image</h5>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <div class="image-container w-50 border d-flex justify-content-center">
-                                    <img id="original-image" class="col-6" src="" alt="">
-                                </div>
-                                <div class="image-container w-50 border d-flex justify-content-center">
-                                    <img id="updated-image" class="col-6" src="" alt="">
-                                </div>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <div class="w-50">
-                                    <textarea name="" id="original-image-url" class="w-100 h-100 form-control" rows="3"
-                                        readonly></textarea>
-                                </div>
-                                <div class="w-50">
-                                    <textarea name="" id="updated-image-url" class="w-100 h-100 form-control" rows="3"
-                                        placeholder="Paste new link here..."></textarea>
-                                </div>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <div class="w-50">
-                                    <textarea name="" id="original-image-alt" class="w-100 form-control" rows="1"
-                                        readonly></textarea>
-                                </div>
-                                <div class="w-50">
-                                    <textarea name="" id="updated-image-alt" class="w-100 form-control" rows="1"
-                                        placeholder="Paste new alt text here..."></textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal"
-                            id="save-changes-image">Save changes</button>
-                    </div>
-                </div>
-            </div>
-        </div>
         <button type="button" class="btn btn-primary d-none hidden-upload-modal" data-bs-toggle="modal"
             data-bs-target="#fileUploadModal">
             Launch demo modal
@@ -439,7 +259,7 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <!-- <h5 class="modal-title" id="exampleModalLabel">Warning</h5> -->
+                        <h5 class="modal-title" id="exampleModalLabel">Alert</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
                             onclick="handleCloseUpload()"></button>
                     </div>
@@ -447,7 +267,7 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                             onclick="handleCloseUpload()">Cancel</button>
-                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal"
+                        <button type="button" class="btn save-changes-btn text-light bg-purple" data-bs-dismiss="modal"
                             id="save-changes-upload">Upload HTML</button>
                     </div>
                 </div>
@@ -461,34 +281,103 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Link Updates</h5>
+                        <h5 class="modal-title fw-bold color-purple" id="exampleModalLabel">Link Updates</h5>
                         <div class="d-flex gap-5 align-items-center">
-                            <div class="input-group" style="width: auto;" >
+                            <!-- <div class="input-group" style="width: auto;" >
                                 <input type="file" class="form-control" id="upload-csv" aria-describedby="upload-btn"
                                     aria-label="Upload" >
-                            </div>
-                            <button onclick="handleHREFTrack()" class="btn btn-dark" title="Removes Tracking URL from HREF Attribute">Remove Tracking URL</button>
+                            </div> -->
+                            <!-- <button onclick="handleHREFTrack()" class="btn btn-dark" title="Removes Tracking URL from HREF Attribute">Remove Tracking URL</button> -->
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="handleCloseUpload()"></button>
                         </div>
                     </div>
-                    <div class="modal-body d-flex flex-column justify-content-between gap-1">
-                        <div class="d-flex gap-1 flex-column" id="anchor-modal-body">
-                            <div class="d-flex justify-content-between">
+                    <div class="modal-body d-flex flex-column justify-content-between gap-1 pb-0">
+                        <div class="d-flex gap-2 flex-column overflow-scroll" id="anchor-modal-body" style="height: 700px;">
+                            <div class="d-flex justify-content-between modal-heading pe-3 color-purple" style="gap: 20px;">
                                 <span class="heading" style=" text-align: center; width: 300px; font-size: 20px; font-weight: bold;" >Preview</span>
                                 <span class="heading" style=" text-align: center; width: 360px; font-size: 20px; font-weight: bold;" >Current URL</span>
-                                <span class="heading" style=" text-align: center; width: 63px; font-size: 20px; font-weight: bold;" ></span>
+                                <span class="heading" style=" text-align: center; width: 64px; font-size: 20px; font-weight: bold;" ></span>
                                 <span class="heading" style=" text-align: center; width: 360px; font-size: 20px; font-weight: bold;" >New URL</span>
                                 <span class="heading" style=" text-align: center; width: 150px; font-size: 20px; font-weight: bold;" >Alias</span>
                                 <span class="heading" style=" text-align: center; width: 16px; font-size: 20px; font-weight: bold;" ></span>
                             </div>
-                            <div id="inner-anchor-modal-body">
+                            <div id="inner-anchor-modal-body" class="pe-2 overflow-scroll">
 
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="handleCloseUpload()">Cancel</button>
-                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="save-changes-anchor">Submit</button>
+                        <button type="button" class="btn btn-dark" data-bs-dismiss="modal" onclick="handleCloseUpload()">Cancel</button>
+                        <button type="button" class="btn save-changes-btn text-light bg-purple" data-bs-dismiss="modal" id="save-changes-anchor">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button type="button" class="btn btn-primary d-none hidden-image-modal" data-bs-toggle="modal"
+            data-bs-target="#imageUpdateModal">
+            Launch demo modal
+        </button>
+        <div class="modal fade" id="imageUpdateModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold color-purple" id="exampleModalLabel">Image Preview</h5>
+                        <div class="d-flex gap-5 align-items-center">
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="handleCloseUpload()"></button>
+                        </div>
+                    </div>
+                    <div class="modal-body d-flex flex-column justify-content-between gap-1 pb-0">
+                        <div class="d-flex gap-2 flex-column overflow-scroll" id="anchor-modal-body" style="height: 700px;">
+                            <div class="d-flex justify-content-evenly modal-heading pe-3 color-purple" style="gap: 20px;">
+                                <span class="heading" style=" text-align: center; width: 210px; font-size: 20px; font-weight: bold;" >Current Preview</span>
+                                <span class="heading" style=" text-align: center; width: 415px; font-size: 20px; font-weight: bold;" >Current SRC</span>
+                                <span class="heading" style=" text-align: center; width: 200px; font-size: 20px; font-weight: bold;" >New Preview</span>
+                                <span class="heading" style=" text-align: center; width: 415px; font-size: 20px; font-weight: bold;" >New SRC</span>
+                                <span class="heading" style=" text-align: center; width: 245px; font-size: 20px; font-weight: bold;" >Alt Text</span>
+                            </div>
+                            <div id="inner-image-modal-body" class="pe-2 overflow-scroll">
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn save-changes-btn text-light bg-purple" data-bs-dismiss="modal" id="save-changes-img">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button type="button" class="btn btn-primary d-none hidden-personalisation-modal" data-bs-toggle="modal"
+        data-bs-target="#removePersonalisationModal">Launch demo modal</button>
+        <div class="modal fade" id="removePersonalisationModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold color-purple" id="exampleModalLabel">Add/Remove Personalisation</h5>
+                        <div class="d-flex gap-5 align-items-center">
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                    </div>
+                    <div class="modal-body d-flex flex-column justify-content-between gap-1 pb-0">
+                        <div class="d-flex gap-1 flex-column overflow-scroll" id="personalisation-modal-body" style="height: 700px;">
+                            <div class="d-flex gap-4 modal-heading">
+                                <input type="text" class="form-control regex-phrase" id="start-regex-phrase" placeholder="Enter Starting Phrase">
+                                <input type="text" class="form-control regex-phrase" id="end-regex-phrase" placeholder="Enter Ending Phrase">
+                                <button class="btn save-changes-btn text-light bg-purple" id="regex-submit">Search</button>
+                            </div>
+                            <!-- <div class="d-flex justify-content-evenly" style="gap: 20px;">
+                                <span class="heading" style=" text-align: center; width: 210px; font-size: 20px; font-weight: bold;" >Preview</span>
+                                <span class="heading" style=" text-align: center; width: 410px; font-size: 20px; font-weight: bold;" >Current SRC</span>
+                                <span class="heading" style=" text-align: center; width: 410px; font-size: 20px; font-weight: bold;" >New SRC</span>
+                                <span class="heading" style=" text-align: center; width: 240px; font-size: 20px; font-weight: bold;" >Alt Text</span>
+                            </div> -->
+                            <div id="inner-personalisation-modal-body" class="pe-2 overflow-scroll h-100" style="padding-top: 20px;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn save-changes-btn text-light bg-purple" data-bs-dismiss="modal" id="save-changes-personalisation">Submit</button>
                     </div>
                 </div>
             </div>
