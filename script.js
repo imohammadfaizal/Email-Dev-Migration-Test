@@ -20,6 +20,12 @@ let fileToUpload;
 document.getElementById('upload-file').addEventListener('change', handleFileUpload, false);
 document.getElementById('upload-new-file').addEventListener('change', handleFileUpload, false);
 document.getElementById('upload-csv').addEventListener('change', handleCSVUpload, false);
+const anchorTagRegex = /<a\b[^>]*?href="([^"]*?)"[^>]*>(.*?)<\/a>/gis;
+const hrefRegex = /href="([^"]*?)"/;
+const imgTagRegex = /<img\b[^>]*>/g;
+const srcRegex = /src="([^"]*?)"/;
+const altRegex = /alt="([^"]*?)"/;
+
 $('#original-file').keyup(() => {
     if ($('#original-file').val()) {
         $('#submit-btn').removeClass('disabled');
@@ -90,7 +96,7 @@ async function handleSubmit() {
 }
 
 function handleEventsInAnchor() {
-    setTimeout(() => {
+    // setTimeout(() => {
     for (let j = 0; j < iFrameLength; j++) {
         originalHREF = iframes[0].contentDocument.querySelectorAll('a');
     }
@@ -109,7 +115,7 @@ function handleEventsInAnchor() {
             })
         });
     }
-    }, 50);
+    // }, 50);
 }
 
 $('#save-changes-url').click(() => {
@@ -120,6 +126,7 @@ $('#save-changes-url').click(() => {
 
 function handleHREFTrack() {
     let flag = 0;
+    const matches = document.getElementById('modified-iframe').srcdoc.match(anchorTagRegex);
     for (let d = 0; d < updatedHREF.length; d++) {
         let HREFTag = updatedHREF[d].anchor.href;
         let mainIframe = document.getElementById('modified-iframe');
@@ -127,6 +134,10 @@ function handleHREFTrack() {
         if (HREFTag && HREFTag !== regexCall(HREFTag)) {
             updatedHREF[d].anchor.href = anchor.href = regexCall(HREFTag);
             updatedHREF[d].flag = 1;
+            const updatedAnchor = matches[d].replace(hrefRegex, (match, hrefValue) => {
+                return `href="${regexCall(HREFTag)}"`; 
+            });
+            mainIframe.srcdoc = mainIframe.srcdoc.replace(matches[d],updatedAnchor);
             modifiedCodeUpdate();
             flag++;
         }
@@ -154,7 +165,6 @@ function handleAnchorHighlight(evt) {
     anchorModalBody.innerHTML = '';
 
     let fragment = document.createDocumentFragment();
-    const anchorTagRegex = /<a\b[^>]*?>.*?<\/a>/g;
     const matches = document.getElementById('modified-iframe').srcdoc.match(anchorTagRegex);
 
     updatedHREF.forEach((href, index) => {
@@ -225,7 +235,6 @@ function handleAnchorHighlight(evt) {
         updatedHREF.forEach((anchorTag, index) => {
             let checkbox = document.getElementById(`checkbox-anchor-${index + 1}`);
             if (checkbox.checked) {
-                const hrefRegex = /href="([^"]*?)"/;
                 let newHref = document.getElementById(`input-anchor-${index + 1}`).value.trim();
                 let alias = document.getElementById(`alias-anchor-${index + 1}`).value.trim();
                 let mainIframe = document.getElementById('modified-iframe');
@@ -339,7 +348,6 @@ async function handleImageExtraction() {
     $('#save-changes-img').addClass('disabled');
     let imageModalBody = document.getElementById('inner-image-modal-body');
     imageModalBody.innerHTML = '';
-    const imgTagRegex = /<img\b[^>]*>/g;
     const matches = document.getElementById('modified-iframe').srcdoc.match(imgTagRegex);
 
     let fragment = document.createDocumentFragment();
@@ -452,8 +460,6 @@ async function handleImageExtraction() {
 
     document.getElementById('save-changes-img').onclick = function () {
         updatedIMG.forEach((imageTag, idx) => {
-            const srcRegex = /src="([^"]*?)"/;
-            const altRegex = /alt="([^"]*?)"/;
             let newSrc = document.getElementById(`input-img-${idx + 1}`).value.trim();
             let newAlt = document.getElementById(`alt-img-${idx + 1}`).value.trim();
             let mainIframe = document.getElementById('modified-iframe');
