@@ -13,7 +13,7 @@ let originalHREF;
 let updatedHREF = [];
 let originalIMG = [];
 let updatedIMG = [];
-let duplicates = [];
+let duplicateSRC = [];
 let HTMLFileName;
 let newUrl;
 let fileToUpload;
@@ -54,12 +54,12 @@ function modifiedIframeCodeUpdate(codeToUpdate) {
     document.getElementById('modified-iframe').contentWindow.document.write(codeToUpdate);
     document.getElementById('modified-iframe').srcdoc = codeToUpdate;
     line_counter('modified');
+    handleEventsInAnchor();
     disableDownload();
     return codeToUpdate;
 }
 
 function modifiedCodeUpdate() {
-    // modifiedCode.value = HTMLDocStandard + '\n' + document.querySelector('#modified-iframe').contentDocument.documentElement.outerHTML;
     modifiedCode.value = document.querySelector('#modified-iframe').srcdoc;
     line_counter('modified');
     disableDownload();
@@ -90,9 +90,11 @@ async function handleSubmit() {
 }
 
 function handleEventsInAnchor() {
+    setTimeout(() => {
     for (let j = 0; j < iFrameLength; j++) {
         originalHREF = iframes[0].contentDocument.querySelectorAll('a');
     }
+    updatedHREF = [];
     for (let j = 1; j < iFrameLength; j++) {
         const anchors = iframes[1].contentDocument.querySelectorAll('a');
         anchors.forEach(anchor => {
@@ -107,6 +109,7 @@ function handleEventsInAnchor() {
             })
         });
     }
+    }, 50);
 }
 
 $('#save-changes-url').click(() => {
@@ -119,8 +122,10 @@ function handleHREFTrack() {
     let flag = 0;
     for (let d = 0; d < updatedHREF.length; d++) {
         let HREFTag = updatedHREF[d].anchor.href;
+        let mainIframe = document.getElementById('modified-iframe');
+        let anchor = mainIframe.contentDocument.querySelectorAll('a')[d];
         if (HREFTag && HREFTag !== regexCall(HREFTag)) {
-            updatedHREF[d].anchor.href = regexCall(HREFTag);
+            updatedHREF[d].anchor.href = anchor.href = regexCall(HREFTag);
             updatedHREF[d].flag = 1;
             modifiedCodeUpdate();
             flag++;
@@ -131,48 +136,15 @@ function handleHREFTrack() {
 }
 
 function regexCall(strToMatch) {
-    // let regex =  strToMatch.match(new RegExp(/(?<=\[@trackurl%20.*\])(https?:\/\/(?:www\.)?[^\s]+)(?=\?utm)/)); 
-    // let regex2 = strToMatch.match(new RegExp(/(?<=\[@trackurl%20.*\])(https?:\/\/(?:www\.)?[^\s]+)(?=\[\/@trackurl\])/));
-    // const regex = strToMatch.match(new RegExp(/https?:\/\/[^\s\[\]?]+(?=\[\/@trackurl|\?utm|$)/g));
     const regex = strToMatch.match(new RegExp(/https?:\/\/[^\s\[\]?]+(?=\[\/@trackurl|\?utm|\?site|$)/g));
     if (regex) {
         return regex[0];
     }
-    // else if (regex2) {
-    //     return regex2[0];
-    // }
     return strToMatch;
 }
 
-function escapeRegExp(str) {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function escapeSpecialChar(str){
-    return !/^(http|https):\/\//i.test(str)
-}
-
-function convertToHTMLEntities(str) {
-    const htmlEntitiesMap = {
-        '©': '&copy;',
-        '®': '&reg;',
-        '™': '&trade;',
-        '“': '&ldquo;',
-        '”': '&rdquo;',
-        '‘': '&lsquo;',
-        '’': '&rsquo;',
-        '—': '&mdash;',
-        '–': '&ndash;',
-        '…': '&hellip;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '&': '&amp;',
-        '"': '&quot;',
-        "'": '&apos;'
-    };
-    return str.replace(/[©®™“”‘’—–…<>&"'']/g, function(match) {
-        return htmlEntitiesMap[match] || match;
-    });
+function escapeSpecialChar(str) {
+    return !/^(http|https):\/\//i.test(str);
 }
 
 function handleAnchorHighlight(evt) {
@@ -180,14 +152,12 @@ function handleAnchorHighlight(evt) {
     $('.hidden-anchor-modal').click();
     let anchorModalBody = document.getElementById('inner-anchor-modal-body');
     anchorModalBody.innerHTML = '';
-    let regexHREFMatches = [];
 
     let fragment = document.createDocumentFragment();
+    const anchorTagRegex = /<a\b[^>]*?>.*?<\/a>/g;
+    const matches = document.getElementById('modified-iframe').srcdoc.match(anchorTagRegex);
 
     updatedHREF.forEach((href, index) => {
-
-        let regex = new RegExp(escapeRegExp(href.anchor.getAttribute('href')), 'g');
-        regexHREFMatches.push(document.querySelector('#modified-iframe').srcdoc.match(regex)[0]);
 
         let container = document.createElement('div');
         container.className = 'iframe-input-container';
@@ -255,15 +225,20 @@ function handleAnchorHighlight(evt) {
         updatedHREF.forEach((anchorTag, index) => {
             let checkbox = document.getElementById(`checkbox-anchor-${index + 1}`);
             if (checkbox.checked) {
+                const hrefRegex = /href="([^"]*?)"/;
                 let newHref = document.getElementById(`input-anchor-${index + 1}`).value.trim();
                 let alias = document.getElementById(`alias-anchor-${index + 1}`).value.trim();
                 let mainIframe = document.getElementById('modified-iframe');
                 let anchor = mainIframe.contentDocument.querySelectorAll('a')[index];
 
-                if (anchor && anchor.hasAttribute('href')) {
+                if (newHref && anchor && anchor.hasAttribute('href')) {                    
                     anchor.href = newHref || anchorTag.anchor.href;
+                    const updatedAnchor = matches[index].replace(hrefRegex, (match, hrefValue) => {
+                        return `href="${newHref}"`; 
+                    });
+                    mainIframe.srcdoc = mainIframe.srcdoc.replace(matches[index],updatedAnchor);   
                     newHref ? anchorTag.flag = 1 : anchorTag.flag = 0;
-                    mainIframe.srcdoc = mainIframe.srcdoc.replace(regexHREFMatches[index], newHref || $(`#current-anchor-${index + 1}`).val());
+                    anchorTag.anchor.href = newHref ? newHref : anchorTag.anchor.href;
                     if (alias) {
                         anchor.setAttribute('alias', alias);
                     } else {
@@ -342,7 +317,8 @@ function handleImageStorage() {
     let imgs = iframes[0].contentDocument.querySelectorAll('img');
     let IMGBgelems = iframes[0].contentDocument.getElementsByTagName('td');
     imgs.forEach(item => originalIMG.push(item.src));
-    duplicates = originalIMG.filter((item, index) => originalIMG.indexOf(item) !== index);
+    duplicateSRC = originalIMG.filter((item, index) => originalIMG.indexOf(item) !== index);
+    
     for (let d = 0; d < IMGBgelems.length; d++) {
         if (IMGBgelems[d].getAttribute('background')) originalIMG.push(IMGBgelems[d].getAttribute('background'));
     }
@@ -363,19 +339,11 @@ async function handleImageExtraction() {
     $('#save-changes-img').addClass('disabled');
     let imageModalBody = document.getElementById('inner-image-modal-body');
     imageModalBody.innerHTML = '';
+    const imgTagRegex = /<img\b[^>]*>/g;
+    const matches = document.getElementById('modified-iframe').srcdoc.match(imgTagRegex);
 
     let fragment = document.createDocumentFragment();
-    let regexSrcMatches = [];
-    let regexAltMatches = [];
     updatedIMG.forEach((img, index) => {
-
-        let imgRegex = new RegExp(img.image.src || img.image, 'g');
-        if(img.image.alt && img.image.alt !== null) {
-            let altRegex = new RegExp(escapeRegExp(convertToHTMLEntities(img.image.alt)), 'g');
-            let altRegex2 = new RegExp(escapeRegExp(img.image.alt), 'g');
-            regexAltMatches.push(document.querySelector('#modified-iframe').srcdoc.match(altRegex) || document.querySelector('#modified-iframe').srcdoc.match(altRegex2));
-        }
-        regexSrcMatches.push(document.querySelector('#modified-iframe').srcdoc.match(imgRegex)[0]);
 
         let container = document.createElement('div');
         container.className = 'iframe-input-container';
@@ -395,8 +363,10 @@ async function handleImageExtraction() {
 
         let imgElement = document.createElement('img');
         imgElement.src = originalIMG[index].src || originalIMG[index];
-        imgElement.alt = originalIMG[index].alt || "";
+        // imgElement.alt = originalIMG[index].alt || "";
+        imgElement.alt = img.image.alt || "";
         imgElement.className = 'img-preview';
+        imgElement.id = `current-preview-${index + 1}`;
 
         imgContainer.appendChild(imgElement);
         imgContainerOuter.appendChild(imgContainer);
@@ -423,9 +393,9 @@ async function handleImageExtraction() {
 
         let imgElementModified = document.createElement('img');
         imgElementModified.src = img.flag === 1 ? img.image.src || img.image : '';
-        imgElementModified.alt = originalIMG[index].alt || "";
+        imgElementModified.alt = img.image.alt || "";
         imgElementModified.className = 'img-preview';
-        imgElementModified.id = `img-preview-${index + 1}`;
+        imgElementModified.id = `modified-preview-${index + 1}`;
 
         imgContainerModified.appendChild(imgElementModified);
         imgContainerModifiedOuter.appendChild(imgContainerModified);
@@ -442,7 +412,7 @@ async function handleImageExtraction() {
             $('#save-changes-img').removeClass('disabled');
             let curr = $('#current-img-' + (index + 1)).val();
             let newVal = $('#input-img-' + (index + 1)).val();
-            if (duplicates.includes(curr)) {
+            if (duplicateSRC.includes(curr)) {
                 $('.current-img').filter((index, item) => {
                     return $(item).val() == curr;
                 }).each((index, item) => {
@@ -460,7 +430,19 @@ async function handleImageExtraction() {
         altField.placeholder = 'Enter alt text';
         altField.className = 'alt-url form-control';
         altField.value = img.image.alt || "";
-        altField.addEventListener('keyup', () => $('#save-changes-img').removeClass('disabled'));
+        altField.addEventListener('keyup', () => {
+            $('#save-changes-img').removeClass('disabled');
+            let currImage = $('#current-img-' + (index + 1)).val();
+            let newVal = $('#alt-img-' + (index + 1)).val();
+            if (duplicateSRC.includes(currImage)) {
+                $('.current-img').filter((index, item) => {
+                    return $(item).val() == currImage;
+                }).each((index, item) => {
+                    let idx = $(item).attr('id').match(/\d+$/)[0];
+                    $('#alt-img-' + idx).val(newVal);
+                })
+            }
+        });
         inputContainer.appendChild(altField);
 
         container.appendChild(inputContainer);
@@ -470,36 +452,49 @@ async function handleImageExtraction() {
 
     document.getElementById('save-changes-img').onclick = function () {
         updatedIMG.forEach((imageTag, idx) => {
+            const srcRegex = /src="([^"]*?)"/;
+            const altRegex = /alt="([^"]*?)"/;
             let newSrc = document.getElementById(`input-img-${idx + 1}`).value.trim();
             let newAlt = document.getElementById(`alt-img-${idx + 1}`).value.trim();
             let mainIframe = document.getElementById('modified-iframe');
             let img = mainIframe.contentDocument.querySelector(`img[src='${updatedIMG[idx].image.src}']`);
+            let img2 = document.getElementById('original-iframe').contentDocument.querySelector(`img[src='${updatedIMG[idx].image.src}']`);
 
-            if (img && img.hasAttribute('src')) {
+            if (newSrc && img && img.hasAttribute('src')) {
                 img.src = newSrc || imageTag.image.src;
-                mainIframe.srcdoc = mainIframe.srcdoc.replace(regexSrcMatches[idx], newSrc || imageTag.image.src);
+                const updatedSrc = matches[idx].replace(srcRegex, (match, srcValue) => {
+                    return `src="${newSrc}"`; 
+                });
+                
+                // mainIframe.srcdoc = mainIframe.srcdoc.replace(matches[idx],updatedSrc);
                 newSrc ? imageTag.flag = 1 : imageTag.flag = 0;
                 imageTag.image.src = newSrc ? newSrc : imageTag.image.src;
                 if (newAlt) {
+                    let matchFound = false;
+                    const updatedAlt = updatedSrc.replace(altRegex, (match, altValue) => {
+                        matchFound = true;
+                        return `alt="${newAlt}"`;
+                    });
+                    const finalUpdatedTag = matchFound
+                        ? updatedAlt
+                        : updatedSrc.replace(/\/?>$/, (closing) => ` alt="${newAlt}" ${closing}`);
+                    mainIframe.srcdoc = mainIframe.srcdoc.replace(matches[idx], finalUpdatedTag);
                     img.alt = imageTag.image.alt = newAlt;
-                    mainIframe.srcdoc = mainIframe.srcdoc.replace(regexAltMatches[idx], newAlt);
                 } else {
+                    mainIframe.srcdoc = mainIframe.srcdoc.replace(matches[idx],updatedSrc);
                     img.removeAttribute('alt');
                 }
                 modifiedCodeUpdate();
             }
-            else if (imageTag.background === true) {
-                let updatedCode = modifiedCode.value;
-                updatedCode = newSrc ? updatedCode.replaceAll(originalIMG[idx], newSrc) : updatedCode;
-                // modifiedCode.value = HTMLDocStandard + '\n' + updatedCode;
-                modifiedCode.value = mainIframe.srcdoc = mainIframe.srcdoc.replaceAll(regexSrcMatches[idx], newSrc || imageTag.image);
+            else if (imageTag.background === true && newSrc) {
+                modifiedCode.value = mainIframe.srcdoc = mainIframe.srcdoc.replaceAll($(`#current-img-${idx+1}`).val(), newSrc || imageTag.image);
                 modifiedIframeCodeUpdate(modifiedCode.value);
                 newSrc ? imageTag.flag = 1 : imageTag.flag = 0;
                 imageTag.image = newSrc ? newSrc : imageTag.image;
+                modifiedCodeUpdate();
             }
         });
         handleToast('Changes saved successfully', 'success');
-        // modifiedCodeUpdate();
     };
     $('.new-img').keyup(function () {
         let idx = $(this).attr('id').match(/\d+$/)[0];
@@ -507,7 +502,7 @@ async function handleImageExtraction() {
             $(`#img-container-${idx}`).addClass('invisible');
         }
         else {
-            $(`#img-preview-${idx}`).attr('src', $(this).val());
+            $(`#modified-preview-${idx}`).attr('src', $(this).val());
             $(`#img-container-${idx}`).removeClass('invisible');
         }
     })
@@ -565,10 +560,9 @@ $('#end-regex-phrase').val(`\\#if\\]`);
 $('#regex-submit').click(() => {
     let start = $('#start-regex-phrase').val();
     let end = $('#end-regex-phrase').val();
-    let iFrameCode = document.querySelector('#modified-iframe').contentDocument.documentElement.outerHTML;
+    let iFrameCode = document.querySelector('#modified-iframe').srcdoc;
     let regex = new RegExp(`${start}.*?${end}`, 'gs');
     let regexMatches = iFrameCode.match(regex);
-    // let regex = iFrameCode.match(new RegExp(/\[\#if.*/gs))[0].match(new RegExp(/\[\#if(.*?)(\/\#if\])/gs))
     let PersonalisationModalBody = document.getElementById('inner-personalisation-modal-body');
     PersonalisationModalBody.innerHTML = '';
 
@@ -644,7 +638,7 @@ $('#regex-submit').click(() => {
             }
         });
 
-        modifiedCode.value = HTMLDocStandard + '\n' + updatedCode;
+        modifiedCode.value = updatedCode;
         handleToast('Changes saved successfully', 'success')
         modifiedIframeCodeUpdate(modifiedCode.value);
         handleEventsInAnchor();
